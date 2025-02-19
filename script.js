@@ -1,16 +1,6 @@
 let canvas = document.querySelector(".interactCanvas");
 let ctx = canvas.getContext("2d");
 
-canvas.resize = () => {
-    let clientRect = canvas.getBoundingClientRect();
-    canvas.height = clientRect.height;
-    canvas.width = clientRect.width;
-}
-
-canvas.resize();
-document.addEventListener('resize', canvas.resize);
-
-
 class GridView {
     constructor(scale) {
         this.cornerX = 0; // In cell units
@@ -21,6 +11,16 @@ class GridView {
         this.numGridLinesY = Math.floor(canvas.width / this.scale);
         this.offsetX = (this.cornerX * this.scale) % this.scale;
         this.offsetY = (this.cornerY * this.scale) % this.scale;
+    }
+
+    draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(let i = 0; i < this.numGridLinesX + 2; ++i) {
+            ctx.fillRect((i - 0.005) * this.scale - this.offsetX, 0, this.scale * 0.01, canvas.height);
+        }
+        for(let j = 0; j < this.numGridLinesY + 2; ++j) {
+            ctx.fillRect(0, j * this.scale - this.offsetY, canvas.width, this.scale * 0.01);
+        }
     }
 
     addObstacle(x, y) {
@@ -39,18 +39,24 @@ class GridView {
         return null;
     }
 
-    draw() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        for(let i = 0; i < this.numGridLinesX + 2; ++i) {
-            ctx.fillRect((i - 0.005) * this.scale - this.offsetX, 0, this.scale * 0.01, canvas.height);
-        }
-        for(let j = 0; j < this.numGridLinesY + 2; ++j) {
-            ctx.fillRect(0, j * this.scale - this.offsetY, canvas.width, this.scale * 0.01);
-        }
+    resizeView() {
+        let clientRect = canvas.getBoundingClientRect();
+        canvas.height = clientRect.height;
+        canvas.width = clientRect.width;
+        this.numGridLinesX = Math.floor(canvas.width / this.scale);
+        this.numGridLinesY = Math.floor(canvas.width / this.scale);
+        this.draw();
     }
 }
 
-// Attach mouse movement to the translate function
+let gridView = new GridView(100);
+gridView.draw();
+
+// Attach resize listener to resize method
+gridView.resizeView();
+window.addEventListener('resize', () => {gridView.resizeView()});
+
+// Attach mouse movement to the translate method
 let mouseX = 0;
 let mouseY = 0;
 let drag = false;
@@ -67,8 +73,3 @@ canvas.addEventListener('mousemove', (e) => {
     }
 });
 canvas.addEventListener('mouseup', () => {drag = false;});
-
-let gridView = new GridView(100);
-gridView.draw();
-
-// ctx.fillRect(0,0,100,100);
