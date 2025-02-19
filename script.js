@@ -5,12 +5,14 @@ function mod(n, m) {
 let canvas = document.querySelector(".interactCanvas");
 let ctx = canvas.getContext("2d");
 
+// TODO: Use animation dictionary to display dynamic tiles, and cause draw to recurse until animation debt cleared
+
 class GridView {
     constructor(scale) {
         this.cornerX = 0; // In cell units
         this.cornerY = 0;
         this.obstacles = new Set(); // List of (x,y) cells representing obstacles
-        this.obstacles.add("0,0");
+        this.animation = {};
         this.scale = scale; // Size (in pixels) of one cell
         this.numGridLinesX = Math.floor(canvas.width / this.scale);
         this.numGridLinesY = Math.floor(canvas.height / this.scale);
@@ -47,7 +49,7 @@ class GridView {
     }
 
     scaleView(mouseX, mouseY, dz, cells = false) {
-        if (this.scale * dz <= 1000 && this.scale * dz >= 10) {
+        if (this.scale * dz <= 1000 && this.scale * dz >= 20) {
             let mousePosX = mouseX + this.cornerX;
             let mousePosY = mouseY + this.cornerY;
             this.scale = this.scale * dz;
@@ -92,6 +94,7 @@ canvas.addEventListener('mousemove', (e) => {
 });
 canvas.addEventListener('mouseup', () => {drag = false;});
 
+// Attach mousewheel to the scale method
 canvas.addEventListener('wheel', (e) => {
     gridView.scaleView(e.clientX, e.clientY, 1 - Math.sign(e.deltaY) * 0.05);
 })
